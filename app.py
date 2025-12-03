@@ -2,21 +2,13 @@ import streamlit as st
 import sqlite3
 import pandas as pd
 import matplotlib.pyplot as plt
-
 import matplotlib.font_manager as fm
 
 # --- 設定 matplotlib 中文字型 ---
 font_path = "NotoSansTC-VariableFont_wght.ttf"  # 字型檔路徑
 font_prop = fm.FontProperties(fname=font_path)
-
 plt.rcParams["font.family"] = font_prop.get_name()
 plt.rcParams["axes.unicode_minus"] = False  # 避免負號無法顯示
-
-# 如果字型沒有就自動忽略，不會壞掉
-try:
-    plt.rcParams['font.family'] = 'Microsoft JhengHei'
-except Exception:
-    pass
 
 st.set_page_config(
     page_title="一週氣溫預報",
@@ -26,7 +18,7 @@ st.set_page_config(
 st.title("🌤️ 一週氣溫預報查詢系統")
 st.markdown("資料來源：中央氣象署農業氣象預報（F-A0010-001）")
 
-# 連線到 SQLite（假設 data.db 跟 app.py 放在同一層）
+# 連線到 SQLite
 conn = sqlite3.connect("dataset.db")
 
 # 取得所有地區名稱
@@ -48,16 +40,15 @@ WHERE regionName = ?
 ORDER BY dataDate
 """
 df = pd.read_sql_query(query, conn, params=(selected_region,))
-
 conn.close()
 
 # 主畫面顯示
 st.subheader(f"📋 {selected_region} 一週氣溫資料表")
 st.dataframe(df, use_container_width=True)
 
+# ----------- 正確的畫圖順序 -----------
 st.subheader("📈 溫度趨勢圖（最高 / 最低氣溫）")
 
-st.pyplot(fig)
 fig, ax = plt.subplots()
 
 ax.plot(df["dataDate"], df["maxt"], marker='o', label="最高氣溫")
@@ -69,4 +60,5 @@ ax.set_ylabel("氣溫 (°C)", fontproperties=font_prop)
 
 plt.xticks(rotation=45, fontproperties=font_prop)
 plt.legend(prop=font_prop)
+
 st.pyplot(fig)
