@@ -18,7 +18,7 @@ st.title("🌤️ 一週氣溫預報查詢系統")
 st.markdown("資料來源：中央氣象署農業氣象預報（F-A0010-001）")
 
 # 連線到 SQLite（假設 data.db 跟 app.py 放在同一層）
-conn = sqlite3.connect("data.db")
+conn = sqlite3.connect("dataset.db")
 
 # 取得所有地區名稱
 regions_df = pd.read_sql_query(
