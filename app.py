@@ -69,4 +69,4 @@ ax.set_ylabel("氣溫 (°C)", fontproperties=font_prop)
 
 plt.xticks(rotation=45, fontproperties=font_prop)
 plt.legend(prop=font_prop)
-
+st.pyplot(fig)
