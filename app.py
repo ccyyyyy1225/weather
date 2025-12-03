@@ -3,41 +3,15 @@ import sqlite3
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
+import plotly.express as px
+import json
+import pandas as pd
 
 # --- 設定 matplotlib 中文字型 ---
 font_path = "NotoSansTC-VariableFont_wght.ttf"  # 字型檔路徑
 font_prop = fm.FontProperties(fname=font_path)
 plt.rcParams["font.family"] = font_prop.get_name()
 plt.rcParams["axes.unicode_minus"] = False  # 避免負號無法顯示
-
-import plotly.express as px
-import json
-import pandas as pd
-
-# 1. 讀取 geojson
-with open("taiwan_regions.geojson", "r", encoding="utf-8") as f:
-    tw_geo = json.load(f)
-
-# 2. 依地區計算平均氣溫 (你也可以改成最高溫)
-df_map = df.groupby("regionName").agg(
-    avg_temp=("maxt", "mean")
-).reset_index()
-
-st.subheader("🗺️ 台灣地區氣溫熱度圖")
-
-# 3. 畫 Plotly 熱度地圖
-fig_map = px.choropleth_mapbox(
-    df_map,
-    geojson=tw_geo,
-    locations="regionName",
-    featureidkey="properties.name",
-    color="avg_temp",
-    color_continuous_scale="YlOrRd",
-    mapbox_style="carto-positron",
-    zoom=6.3,
-    center={"lat": 23.7, "lon": 121},
-    opacity=0.7,
-)
 
 st.plotly_chart(fig_map, use_container_width=True)
 
@@ -72,6 +46,30 @@ ORDER BY dataDate
 """
 df = pd.read_sql_query(query, conn, params=(selected_region,))
 conn.close()
+# 1. 讀取 geojson
+with open("taiwan_regions.geojson", "r", encoding="utf-8") as f:
+    tw_geo = json.load(f)
+
+# 2. 依地區計算平均氣溫 (你也可以改成最高溫)
+df_map = df.groupby("regionName").agg(
+    avg_temp=("maxt", "mean")
+).reset_index()
+
+st.subheader("🗺️ 台灣地區氣溫熱度圖")
+
+# 3. 畫 Plotly 熱度地圖
+fig_map = px.choropleth_mapbox(
+    df_map,
+    geojson=tw_geo,
+    locations="regionName",
+    featureidkey="properties.name",
+    color="avg_temp",
+    color_continuous_scale="YlOrRd",
+    mapbox_style="carto-positron",
+    zoom=6.3,
+    center={"lat": 23.7, "lon": 121},
+    opacity=0.7,
+)
 
 # 主畫面顯示
 st.subheader(f"📋 {selected_region} 一週氣溫資料表")
